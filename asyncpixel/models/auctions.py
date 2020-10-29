@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass
 class Bids:
     """Bid."""
+
     auction_id: str
     bidder: str
     profile_id: str
@@ -18,6 +19,7 @@ class Bids:
 @dataclass
 class AuctionItem:
     """auction item class."""
+
     uuid: str
     auctioneer: str
     profile_id: str
@@ -41,6 +43,7 @@ class AuctionItem:
 @dataclass
 class Auction:
     """Main auction object."""
+
     page: str
     total_pages: str
     total_auctions: str

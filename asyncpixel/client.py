@@ -46,7 +46,9 @@ class Client:
         """Used for safe client cleanup and stuff."""
         await self.session.close()
 
-    async def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    async def get(
+        self, path: str, params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Base function to get raw data from hypixel.
 
         Args:
@@ -244,7 +246,7 @@ class Client:
                 sell_summary.append(
                     BazaarSellSummary(
                         amount=sell["amount"],
-                        pricePerUnit=sell["pricePerUnit"],
+                        price_per_unit=sell["pricePerUnit"],
                         orders=sell["orders"],
                     )
                 )
@@ -252,21 +254,21 @@ class Client:
                 buy_summary.append(
                     BazaarBuySummary(
                         amount=buy["amount"],
-                        pricePerUnit=buy["pricePerUnit"],
+                        price_per_unit=buy["pricePerUnit"],
                         orders=buy["orders"],
                     )
                 )
             quick = elements["quick_status"]
             bazaar_quick_status = BazaarQuickStatus(
-                productId=quick["productId"],
-                sellPrice=quick["sellPrice"],
-                sellVolume=quick["sellVolume"],
-                sellMovingWeek=quick["sellMovingWeek"],
-                sellOrders=quick["sellOrders"],
-                buyPrice=quick["buyPrice"],
-                buyVolume=quick["buyVolume"],
-                buyMovingWeek=quick["buyMovingWeek"],
-                buyOrders=quick["buyOrders"],
+                product_id=quick["productId"],
+                sell_price=quick["sellPrice"],
+                sell_volume=quick["sellVolume"],
+                sell_moving_week=quick["sellMovingWeek"],
+                sell_orders=quick["sellOrders"],
+                buy_price=quick["buyPrice"],
+                buy_volume=quick["buyVolume"],
+                buy_moving_week=quick["buyMovingWeek"],
+                buy_orders=quick["buyOrders"],
             )
             bazaar_items.append(
                 BazaarItem(

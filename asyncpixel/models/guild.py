@@ -8,6 +8,7 @@ from dataclasses import dataclass
 @dataclass
 class Banner:
     """Banner for the guild."""
+
     Base: int
     Patterns: List[Dict[str, Union[int, str]]]
 
@@ -15,6 +16,7 @@ class Banner:
 @dataclass
 class Members:
     """Members in a guild."""
+
     uuid: str
     rank: str
     joined: datetime.datetime
@@ -26,6 +28,7 @@ class Members:
 @dataclass
 class Rank:
     """Rank."""
+
     name: str
     default: bool
     created: int
@@ -36,6 +39,7 @@ class Rank:
 @dataclass
 class Guild:
     """Guild object."""
+
     _id: str
     created: datetime.datetime
     name: str

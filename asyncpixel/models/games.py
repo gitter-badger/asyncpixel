@@ -8,6 +8,7 @@ from typing import Optional
 @dataclass
 class Game:
     """Game class."""
+
     date: datetime.datetime
     game_type: str
     mode: str

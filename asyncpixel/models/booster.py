@@ -9,6 +9,7 @@ from dataclasses import dataclass
 @dataclass
 class Booster:
     """Main booster class."""
+
     _id: str
     purchaser_uuid: str
     amount: int
@@ -22,5 +23,6 @@ class Booster:
 @dataclass
 class Boosters:
     """Object containing boosters."""
+
     booster_statedecrementing: bool
     boosters: List[Booster]

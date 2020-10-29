@@ -5,6 +5,7 @@ from dataclasses import dataclass
 @dataclass
 class Key:
     """Main class for key data."""
+
     key: str
     owner: str
     limit: int
