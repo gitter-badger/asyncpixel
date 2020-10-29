@@ -25,6 +25,7 @@ class Members:
 
 @dataclass
 class Rank:
+    """Rank."""
     name: str
     default: bool
     created: int
@@ -35,7 +36,7 @@ class Rank:
 @dataclass
 class Guild:
     """Guild object."""
-    id: str
+    _id: str
     created: datetime.datetime
     name: str
     name_lower: str

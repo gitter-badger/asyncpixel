@@ -1,18 +1,18 @@
 """A Python HypixelAPI wrapper."""
 
 import datetime as dt
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Any
 
 import aiohttp
 
 from .exceptions.exceptions import ApiNoSuccess, InvalidApiKey, RateLimitError
-from .models.auctions import Auction, Auction_item
+from .models.auctions import Auction, AuctionItem
 from .models.bazaar import (
     Bazaar,
-    Bazaar_buy_summary,
-    Bazaar_item,
-    Bazaar_quick_status,
-    Bazaar_sell_summary,
+    BazaarBuySummary,
+    BazaarItem,
+    BazaarQuickStatus,
+    BazaarSellSummary,
 )
 from .models.booster import Booster, Boosters
 from .models.friends import Friend
@@ -46,7 +46,7 @@ class Client:
         """Used for safe client cleanup and stuff."""
         await self.session.close()
 
-    async def get(self, path: str, params: Optional[Dict] = None) -> Dict:
+    async def get(self, path: str, params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Base function to get raw data from hypixel.
 
         Args:
@@ -73,15 +73,15 @@ class Client:
         if response.status == 429:
             raise RateLimitError("Hypixel")
 
-        response = await response.json()
-        if "cause" in response:
-            if response["cause"] == "Invalid API key":
+        data = await response.json()
+        if "cause" in data:
+            if data["cause"] == "Invalid API key":
                 raise InvalidApiKey()
 
-        if not response["success"]:
+        if not data["success"]:
             raise ApiNoSuccess()
 
-        return response
+        return data
 
     async def get_watchdog_stats(self) -> WatchDog:
         """Get current watchdog stats.
@@ -92,14 +92,14 @@ class Client:
         data = await self.get("watchdogstats")
 
         return WatchDog(
-            watchdog_lastMinute=data["watchdog_lastMinute"],
-            staff_rollingDaily=data["staff_rollingDaily"],
+            watchdog_last_minute=data["watchdog_lastMinute"],
+            staff_rolling_daily=data["staff_rollingDaily"],
             watchdog_total=data["watchdog_total"],
-            watchdog_rollingDaily=data["watchdog_rollingDaily"],
+            watchdog_rolling_daily=data["watchdog_rollingDaily"],
             staff_total=data["staff_total"],
         )
 
-    async def get_key_data(self, key: str = None) -> Key:
+    async def get_key_data(self, key: Optional[str] = None) -> Key:
         """Get information about an api key.
 
         Args:
@@ -108,7 +108,7 @@ class Client:
         Returns:
             Key: Key object
         """
-        if key is None:
+        if not key:
             key = self.api_key
 
         data = await self.get("key")
@@ -117,8 +117,8 @@ class Client:
             key=data["record"]["key"],
             owner=data["record"]["owner"],
             limit=data["record"]["limit"],
-            queriesInPastMin=data["record"]["queriesInPastMin"],
-            totalQueries=data["record"]["totalQueries"],
+            queries_in_past_min=data["record"]["queriesInPastMin"],
+            total_queries=data["record"]["totalQueries"],
         )
 
     async def get_boosters(self) -> Boosters:
@@ -134,19 +134,19 @@ class Client:
             boosterlist.append(
                 Booster(
                     _id=boost["_id"],
-                    purchaserUuid=boost["purchaserUuid"],
+                    purchaser_uuid=boost["purchaserUuid"],
                     amount=boost["amount"],
-                    originalLength=boost["originalLength"],
+                    original_length=boost["originalLength"],
                     length=boost["length"],
-                    gameType=boost["gameType"],
-                    dateActivated=dt.datetime.fromtimestamp(
+                    game_type=boost["gameType"],
+                    date_activated=dt.datetime.fromtimestamp(
                         boost["dateActivated"] / 1000
                     ),
                     stacked=boost["stacked"] if "stacked" in boost else False,
                 )
             )
         return Boosters(
-            boosterStatedecrementing=data["boosterState"]["decrementing"],
+            booster_statedecrementing=data["boosterState"]["decrementing"],
             boosters=boosterlist,
         )
 
@@ -194,7 +194,7 @@ class Client:
         if data["session"]["online"]:
             return Status(
                 online=True,
-                gameType=data["session"]["gameType"],
+                game_type=data["session"]["gameType"],
                 _mode=data["session"]["mode"],
                 _map=data["session"],
             )
@@ -218,8 +218,8 @@ class Client:
             friend_list.append(
                 Friend(
                     _id=friend["_id"],
-                    uuidSender=friend["uuidSender"],
-                    uuidReceiver=friend["uuidReceiver"],
+                    uuid_sender=friend["uuidSender"],
+                    uuid_receiver=friend["uuidReceiver"],
                     started=dt.datetime.fromtimestamp(friend["started"] / 1000),
                 )
             )
@@ -242,7 +242,7 @@ class Client:
             buy_summary = []
             for sell in elements["sell_summary"]:
                 sell_summary.append(
-                    Bazaar_sell_summary(
+                    BazaarSellSummary(
                         amount=sell["amount"],
                         pricePerUnit=sell["pricePerUnit"],
                         orders=sell["orders"],
@@ -250,14 +250,14 @@ class Client:
                 )
             for buy in elements["buy_summary"]:
                 buy_summary.append(
-                    Bazaar_buy_summary(
+                    BazaarBuySummary(
                         amount=buy["amount"],
                         pricePerUnit=buy["pricePerUnit"],
                         orders=buy["orders"],
                     )
                 )
             quick = elements["quick_status"]
-            bazaar_quick_status = Bazaar_quick_status(
+            bazaar_quick_status = BazaarQuickStatus(
                 productId=quick["productId"],
                 sellPrice=quick["sellPrice"],
                 sellVolume=quick["sellVolume"],
@@ -269,7 +269,7 @@ class Client:
                 buyOrders=quick["buyOrders"],
             )
             bazaar_items.append(
-                Bazaar_item(
+                BazaarItem(
                     name=name,
                     product_id=elements["product_id"],
                     sell_summary=sell_summary,
@@ -279,11 +279,11 @@ class Client:
             )
 
         return Bazaar(
-            lastUpdated=dt.datetime.fromtimestamp(1590854517479 / 1000),
+            last_updated=dt.datetime.fromtimestamp(1590854517479 / 1000),
             bazaar_items=bazaar_items,
         )
 
-    async def auctions(self, page: int = 0) -> Auction:
+    async def auctions(self, page: Optional[int] = 0) -> Auction:
         """Get the auctions available.
 
         Args:
@@ -297,7 +297,7 @@ class Client:
         auction_list = []
         for auc in data["auctions"]:
             auction_list.append(
-                Auction_item(
+                AuctionItem(
                     uuid=auc["uuid"],
                     auctioneer=auc["auctioneer"],
                     profile_id=auc["profile_id"],
@@ -315,13 +315,14 @@ class Client:
                     claimed_bidders=auc["claimed_bidders"],
                     highest_bid_amount=auc["highest_bid_amount"],
                     bids=auc["bids"],
+                    _id=auc["_id"],
                 )
             )
         return Auction(
             page=data["page"],
-            totalPages=data["totalPages"],
-            totalAuctions=data["totalAuctions"],
-            lastUpdated=dt.datetime.fromtimestamp(data["lastUpdated"] / 1000),
+            total_pages=data["totalPages"],
+            total_auctions=data["totalAuctions"],
+            last_updated=dt.datetime.fromtimestamp(data["lastUpdated"] / 1000),
             auctions=auction_list,
         )
 
@@ -344,7 +345,7 @@ class Client:
                 games_list.append(
                     Game(
                         date=dt.datetime.fromtimestamp(game["date"] / 1000),
-                        gameType=game["gameType"],
+                        game_type=game["gameType"],
                         mode=game["Mode"],
                         _map=game["map"],
                         ended=dt.datetime.fromtimestamp(game["ended"] / 1000),
@@ -354,7 +355,7 @@ class Client:
                 games_list.append(
                     Game(
                         date=dt.datetime.fromtimestamp(game["date"] / 1000),
-                        gameType=game["gameType"],
+                        game_type=game["gameType"],
                         mode=game["Mode"],
                         _map=game["map"],
                     )
@@ -378,37 +379,37 @@ class Client:
         return Player(
             _id=data["player"]["_id"],
             uuid=data["player"]["uuid"],
-            firstLogin=dt.datetime.fromtimestamp(data["player"]["firstLogin"] / 1000),
+            first_login=dt.datetime.fromtimestamp(data["player"]["firstLogin"] / 1000),
             playername=data["player"]["playername"],
-            lastLogin=dt.datetime.fromtimestamp(data["player"]["lastLogin"] / 1000),
+            last_login=dt.datetime.fromtimestamp(data["player"]["lastLogin"] / 1000),
             displayname=data["player"]["displayname"],
-            knownAliases=data["player"]["knownAliases"],
-            knownAliasesLower=data["player"]["knownAliasesLower"],
-            achievementsOneTime=data["player"]["achievementsOneTime"],
-            mcVersionRp=data["player"]["mcVersionRp"],
-            networkExp=data["player"]["networkExp"],
+            known_aliases=data["player"]["knownAliases"],
+            known_aliases_lower=data["player"]["knownAliasesLower"],
+            achievements_one_time=data["player"]["achievementsOneTime"],
+            mc_version_rp=data["player"]["mcVersionRp"],
+            network_exp=data["player"]["networkExp"],
             karma=data["player"]["karma"],
             spec_always_flying=data["player"]["spec_always_flying"],
-            lastAdsenseGenerateTime=data["player"]["lastAdsenseGenerateTime"],
-            lastClaimedReward=data["player"]["lastClaimedReward"],
-            totalRewards=data["player"]["totalRewards"],
-            totalDailyRewards=data["player"]["totalDailyRewards"],
-            rewardStreak=data["player"]["rewardStreak"],
-            rewardScore=data["player"]["rewardScore"],
-            rewardHighScore=data["player"]["rewardHighScore"],
-            lastLogout=dt.datetime.fromtimestamp(data["player"]["lastLogout"] / 1000),
-            friendRequestsUuid=data["player"]["friendRequestsUuid"],
+            last_adsense_generate_time=data["player"]["lastAdsenseGenerateTime"],
+            last_claimed_reward=data["player"]["lastClaimedReward"],
+            total_rewards=data["player"]["totalRewards"],
+            total_daily_rewards=data["player"]["totalDailyRewards"],
+            reward_streak=data["player"]["rewardStreak"],
+            reward_score=data["player"]["rewardScore"],
+            reward_high_score=data["player"]["rewardHighScore"],
+            last_logout=dt.datetime.fromtimestamp(data["player"]["lastLogout"] / 1000),
+            friend_requests_uuid=data["player"]["friendRequestsUuid"],
             network_update_book=data["player"]["network_update_book"],
-            achievementTracking=data["player"]["achievementTracking"],
-            achievementPoints=data["player"]["achievementPoints"],
-            currentGadget=data["player"]["currentGadget"],
+            achievement_tracking=data["player"]["achievementTracking"],
+            achievement_points=data["player"]["achievementPoints"],
+            current_gadget=data["player"]["currentGadget"],
             channel=data["player"]["channel"],
-            mostRecentGameType=data["player"]["mostRecentGameType"],
-            level=self.calcPlayerLevel(data["player"]["networkExp"]),
+            most_recent_game_type=data["player"]["mostRecentGameType"],
+            level=self.calc_player_level(data["player"]["networkExp"]),
         )
 
     @staticmethod
-    def calcPlayerLevel(xp: int) -> int:
+    def calc_player_level(xp: int) -> int:
         """Calculate player level from xp.
 
         Args:
@@ -490,7 +491,7 @@ class Client:
         return guild_object
 
     @staticmethod
-    def create_guild_object(data: Dict) -> Guild:
+    def create_guild_object(data: Dict[str, Any]) -> Guild:
         """Create guild object from json.
 
         Args:
@@ -507,50 +508,22 @@ class Client:
             name_lower=guild["name_lower"],
             description=guild["description"],
             tag=guild["tag"],
-            tagColor=guild["tagColor"],
+            tag_color=guild["tagColor"],
             exp=guild["exp"],
             members=guild["members"],
             achievements=guild["achievements"],
             ranks=guild["ranks"],
             joinable=guild["joinable"],
-            legacyRanking=guild["legacyRanking"],
-            publiclyListed=guild["publiclyListed"],
-            hideGmTag=guild["hideGmTag"],
-            preferredGames=guild["preferredGames"],
-            chatMute=guild["chatMute"],
-            guildExpByGameType=guild["guildExpByGameType"],
+            legacy_ranking=guild["legacyRanking"],
+            publicly_listed=guild["publiclyListed"],
+            hide_gm_tag=guild["hideGmTag"],
+            preferred_games=guild["preferredGames"],
+            chat_mute=guild["chatMute"],
+            guild_exp_by_game_type=guild["guildExpByGameType"],
             banner=guild["banner"],
         )
 
-    async def get_profile(self, profile: str) -> Dict:
-        """Get profile info of a skyblock player.
-
-        Args:
-            profile (str): profile id of player ca be gotten from
-                            running get_profiles
-
-        Returns:
-            Dict: json response
-        """
-        params = {"profile": profile}
-        data = await self.get("skyblock/profile", params=params)
-        return data["profile"]
-
-    async def get_profiles(self, uuid: str) -> Dict:
-        """Get info on a profile.
-
-        Args:
-            uuid (str): uuid of player
-
-        Returns:
-            Dict: json response
-        """
-        uuid = uuid.replace("-", "")
-        params = {"uuid": uuid}
-        data = await self.get("skyblock/profiles", params=params)
-        return data["profiles"]
-
-    async def get_auction_from_uuid(self, uuid: str) -> List[Auction_item]:
+    async def get_auction_from_uuid(self, uuid: str) -> List[AuctionItem]:
         """Get auction from uuid.
 
         Args:
@@ -564,7 +537,7 @@ class Client:
         auction_items = self.create_auction_object(data)
         return auction_items
 
-    async def get_auction_from_player(self, player: str) -> List[Auction_item]:
+    async def get_auction_from_player(self, player: str) -> List[AuctionItem]:
         """Get auction data from player.
 
         Args:
@@ -578,7 +551,7 @@ class Client:
         auction_items = self.create_auction_object(data)
         return auction_items
 
-    async def get_auction_from_profile(self, profile_id: str) -> List[Auction_item]:
+    async def get_auction_from_profile(self, profile_id: str) -> List[AuctionItem]:
         """Get auction data from profile.
 
         Args:
@@ -593,7 +566,7 @@ class Client:
         return auction_items
 
     @staticmethod
-    def create_auction_object(data: Dict[str, List[Dict[str, Union[int, datetime.datetime, str]]]]) -> List[Auction_item]:
+    def create_auction_object(data: Dict[str, Any]) -> List[AuctionItem]:
         """Create auction object.
 
         Args:
@@ -605,7 +578,7 @@ class Client:
         auction_list = []
         for auc in data["auctions"]:
             auction_list.append(
-                Auction_item(
+                AuctionItem(
                     _id=auc["_id"],
                     uuid=auc["uuid"],
                     auctioneer=auc["auctioneer"],
@@ -630,83 +603,111 @@ class Client:
 
     # NOT FULLY IMPLEMENTED
 
-    async def get_game_count(self) -> Dict:# type: ignore
-        """Get the current game count.
+    # async def get_profile(self, profile: str) -> Dict:
+    #     """Get profile info of a skyblock player.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("gameCounts")
-        return data["games"]
+    #     Args:
+    #         profile (str): profile id of player ca be gotten from
+    #                         running get_profiles
 
-    async def get_leaderboard(self) -> Dict:# type: ignore
-        """Get the current leaderboards.
+    #     Returns:
+    #         Dict: json response
+    #     """
+    #     params = {"profile": profile}
+    #     data = await self.get("skyblock/profile", params=params)
+    #     return data["profile"]
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("leaderboards")
-        return data["leaderboards"]
+    # async def get_profiles(self, uuid: str) -> Dict:
+    #     """Get info on a profile.
 
-    async def get_resources_achievements(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    #     Args:
+    #         uuid (str): uuid of player
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/achievements")
-        return data["achievements"]
+    #     Returns:
+    #         Dict: json response
+    #     """
+    #     uuid = uuid.replace("-", "")
+    #     params = {"uuid": uuid}
+    #     data = await self.get("skyblock/profiles", params=params)
+    #     return data["profiles"]
 
-    async def get_resources_challenges(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_game_count(self) -> Dict:# type: ignore
+    #     """Get the current game count.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/challenges")
-        return data["challenges"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("gameCounts")
+    #     return data["games"]
 
-    async def get_resources_quests(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_leaderboard(self) -> Dict:# type: ignore
+    #     """Get the current leaderboards.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/quests")
-        return data["quests"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("leaderboards")
+    #     return data["leaderboards"]
 
-    async def get_resources_guilds_achievements(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_resources_achievements(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/guilds/achievements")
-        return data["guilds/achievements"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/achievements")
+    #     return data["achievements"]
 
-    async def get_resources_guilds_permissions(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_resources_challenges(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/guilds/permissions")
-        return data["guilds/permissions"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/challenges")
+    #     return data["challenges"]
 
-    async def get_resources_skyblock_collections(self) -> Dict:# type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_resources_quests(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/skyblock/collections")
-        return data["skyblock/collections"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/quests")
+    #     return data["quests"]
 
-    async def get_resources_skyblock_skills(self) -> Dict: # type: ignore
-        """Get the current resources. Does not require api key.
+    # async def get_resources_guilds_achievements(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
 
-        Returns:
-            dict: raw json response
-        """
-        data = await self.get("resources/skyblock/skills")
-        return data["skyblock/skills"]
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/guilds/achievements")
+    #     return data["guilds/achievements"]
+
+    # async def get_resources_guilds_permissions(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
+
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/guilds/permissions")
+    #     return data["guilds/permissions"]
+
+    # async def get_resources_skyblock_collections(self) -> Dict:# type: ignore
+    #     """Get the current resources. Does not require api key.
+
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/skyblock/collections")
+    #     return data["skyblock/collections"]
+
+    # async def get_resources_skyblock_skills(self) -> Dict: # type: ignore
+    #     """Get the current resources. Does not require api key.
+
+    #     Returns:
+    #         dict: raw json response
+    #     """
+    #     data = await self.get("resources/skyblock/skills")
+    #     return data["skyblock/skills"]
