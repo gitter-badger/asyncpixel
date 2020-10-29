@@ -90,7 +90,7 @@ Credits
 
 .. _@GPL: https://opensource.org/licenses/GPL-3.0
 .. _PyPI: https://pypi.org/
-.. _file an issue: https://github.com/Darkflame72/asyncpixel/issues
+.. _file an issue: https://github.com/Obsidion-dev/asyncpixel/issues
 .. _pip: https://pip.pypa.io/
 .. github-only
 .. _Contributor Guide: CONTRIBUTING.rst
