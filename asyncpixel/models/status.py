@@ -8,6 +8,6 @@ class Status:
     """Status data object."""
 
     online: bool
-    game_type: Optional[str]
-    _mode: Optional[str]
-    _map: Optional[str]
+    game_type: Optional[str] = None
+    _mode: Optional[str] = None
+    _map: Optional[str] = None

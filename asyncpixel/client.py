@@ -75,7 +75,7 @@ class Client:
         if response.status == 429:
             raise RateLimitError("Hypixel")
 
-        data = await response.json()
+        data: Dict[str, Any] = await response.json()
         if "cause" in data:
             if data["cause"] == "Invalid API key":
                 raise InvalidApiKey()
@@ -160,7 +160,7 @@ class Client:
         """
         data = await self.get("playerCount")
 
-        return data["playerCount"]
+        return int(data["playerCount"])
 
     async def get_news(self) -> List[News]:
         """Get current skyblock news.
@@ -433,7 +433,7 @@ class Client:
         """
         params = {"byName": name}
         data = await self.get("findGuild", params=params)
-        return data["guild"]
+        return str(data["guild"])
 
     async def find_guild_by_uuid(self, uuid: str) -> str:
         """Find guild by uuid.
@@ -447,7 +447,7 @@ class Client:
         uuid = uuid.replace("-", "")
         params = {"byUuid": uuid}
         data = await self.get("findGuild", params=params)
-        return data["guild"]
+        return str(data["guild"])
 
     async def get_guild_by_name(self, guild_name: str) -> Guild:
         """Get guild by name.

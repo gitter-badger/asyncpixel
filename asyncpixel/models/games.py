@@ -13,4 +13,4 @@ class Game:
     game_type: str
     mode: str
     _map: str
-    ended: Optional[datetime.datetime]
+    ended: Optional[datetime.datetime] = None
