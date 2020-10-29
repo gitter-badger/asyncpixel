@@ -1,29 +1,16 @@
-The Ayncpixel Python Project
-==============================
+.. include:: ../README.rst
+   :end-before: github-only
+
+.. _Contributor Guide: contributing.html
+.. _Usage: usage.html
 
 .. toctree::
    :hidden:
    :maxdepth: 1
 
-   license
+   usage
    reference
-
-TODO
-
-
-Installation
-------------
-
-To install the Asyncpixel Python project,
-run this command in your terminal:
-
-.. code-block:: console
-
-   $ pip install asyncpixel
-
-
-Usage
------
-
-Asyncpixel Python's usage looks like:
- TODO
+   contributing
+   Code of Conduct <codeofconduct>
+   License <license>
+   Changelog <https://github.com/darkflame72/asyncpixel/releases>

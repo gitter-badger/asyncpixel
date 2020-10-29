@@ -1,7 +1,7 @@
 """A Python HypixelAPI wrapper."""
 
 import datetime as dt
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Union
 
 import aiohttp
 
@@ -46,7 +46,7 @@ class Client:
         """Used for safe client cleanup and stuff."""
         await self.session.close()
 
-    async def get(self, path: str, params: Optional[Dict] = None) -> dict:
+    async def get(self, path: str, params: Optional[Dict] = None) -> Dict:
         """Base function to get raw data from hypixel.
 
         Args:
@@ -593,7 +593,7 @@ class Client:
         return auction_items
 
     @staticmethod
-    def create_auction_object(data: Dict) -> List[Auction_item]:
+    def create_auction_object(data: Dict[str, List[Dict[str, Union[int, datetime.datetime, str]]]]) -> List[Auction_item]:
         """Create auction object.
 
         Args:
@@ -630,7 +630,7 @@ class Client:
 
     # NOT FULLY IMPLEMENTED
 
-    async def get_game_count(self) -> dict:
+    async def get_game_count(self) -> Dict:# type: ignore
         """Get the current game count.
 
         Returns:
@@ -639,7 +639,7 @@ class Client:
         data = await self.get("gameCounts")
         return data["games"]
 
-    async def get_leaderboard(self) -> dict:
+    async def get_leaderboard(self) -> Dict:# type: ignore
         """Get the current leaderboards.
 
         Returns:
@@ -648,7 +648,7 @@ class Client:
         data = await self.get("leaderboards")
         return data["leaderboards"]
 
-    async def get_resources_achievements(self) -> dict:
+    async def get_resources_achievements(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -657,7 +657,7 @@ class Client:
         data = await self.get("resources/achievements")
         return data["achievements"]
 
-    async def get_resources_challenges(self) -> dict:
+    async def get_resources_challenges(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -666,7 +666,7 @@ class Client:
         data = await self.get("resources/challenges")
         return data["challenges"]
 
-    async def get_resources_quests(self) -> dict:
+    async def get_resources_quests(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -675,7 +675,7 @@ class Client:
         data = await self.get("resources/quests")
         return data["quests"]
 
-    async def get_resources_guilds_achievements(self) -> dict:
+    async def get_resources_guilds_achievements(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -684,7 +684,7 @@ class Client:
         data = await self.get("resources/guilds/achievements")
         return data["guilds/achievements"]
 
-    async def get_resources_guilds_permissions(self) -> dict:
+    async def get_resources_guilds_permissions(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -693,7 +693,7 @@ class Client:
         data = await self.get("resources/guilds/permissions")
         return data["guilds/permissions"]
 
-    async def get_resources_skyblock_collections(self) -> dict:
+    async def get_resources_skyblock_collections(self) -> Dict:# type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -702,7 +702,7 @@ class Client:
         data = await self.get("resources/skyblock/collections")
         return data["skyblock/collections"]
 
-    async def get_resources_skyblock_skills(self) -> dict:
+    async def get_resources_skyblock_skills(self) -> Dict: # type: ignore
         """Get the current resources. Does not require api key.
 
         Returns:
