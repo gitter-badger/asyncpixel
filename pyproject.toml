@@ -57,6 +57,8 @@ sphinx-autodoc-typehints = "^1.11.0"
 sphinx-rtd-theme = "^0.5.0"
 typeguard = "^2.9.1"
 sphinxcontrib-asyncio = "^0.3.0"
+pytest-asyncio = "^0.14.0"
+cryptography = "^3.2.1"
 
 [tool.black]
 exclude = '''

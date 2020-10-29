@@ -30,17 +30,24 @@ BASE_URL = "https://api.hypixel.net/"
 class Client:
     """Client class for hypixel wrapper."""
 
-    def __init__(self, api_key: str) -> None:
-        """Initialise base class by storing keys and creating session.
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        session: Optional[aiohttp.ClientSession] = None,
+    ) -> None:
+        """Initialise client object.
 
         Args:
-            api_key (str): hypixel api key
+            api_key (Optional[str], optional): hypixel api key. Defaults to None.
+            session (Optional[aiohttp.ClientSession], optional): provide an aiohttp session. Defaults to None.
         """
-        # Handles the instance of a singular key
 
         self.api_key = api_key
 
-        self.session = aiohttp.ClientSession()
+        if session:
+            self.session = session
+        else:
+            self.session = aiohttp.ClientSession()
 
     async def close(self) -> None:
         """Used for safe client cleanup and stuff."""
