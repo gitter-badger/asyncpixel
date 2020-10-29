@@ -1,20 +1,24 @@
 """A Python HypixelAPI wrapper."""
-
 import datetime as dt
-from typing import Dict, List, Optional, Any
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
 import aiohttp
 
-from .exceptions.exceptions import ApiNoSuccess, InvalidApiKey, RateLimitError
-from .models.auctions import Auction, AuctionItem
-from .models.bazaar import (
-    Bazaar,
-    BazaarBuySummary,
-    BazaarItem,
-    BazaarQuickStatus,
-    BazaarSellSummary,
-)
-from .models.booster import Booster, Boosters
+from .exceptions.exceptions import ApiNoSuccess
+from .exceptions.exceptions import InvalidApiKey
+from .exceptions.exceptions import RateLimitError
+from .models.auctions import Auction
+from .models.auctions import AuctionItem
+from .models.bazaar import Bazaar
+from .models.bazaar import BazaarBuySummary
+from .models.bazaar import BazaarItem
+from .models.bazaar import BazaarQuickStatus
+from .models.bazaar import BazaarSellSummary
+from .models.booster import Booster
+from .models.booster import Boosters
 from .models.friends import Friend
 from .models.games import Game
 from .models.guild import Guild
@@ -74,8 +78,8 @@ class Client:
         """
         if params is None:
             params = {}
-
-        params["key"] = self.api_key
+        if self.api_key:
+            params["key"] = self.api_key
 
         response = await self.session.get(f"{BASE_URL}{path}", params=params)
 

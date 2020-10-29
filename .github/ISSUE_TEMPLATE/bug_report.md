@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a report to help us improve
-title: ''
-labels: ''
-assignees: ''
-
+title: ""
+labels: ""
+assignees: ""
 ---
 
 **Describe the bug**
@@ -20,9 +19,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **OS (please complete the following information:**
- - OS: [e.g. Windows 10]
- - Python version [e.g. 3.8.1]
- - Version [e.g. 1]
+
+- OS: [e.g. Windows 10]
+- Python version [e.g. 3.8.1]
+- Version [e.g. 1]
 
 **Additional context**
 Add any other context about the problem here.

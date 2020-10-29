@@ -56,14 +56,14 @@ that uses the facility (other than as an argument passed when the
 facility is invoked), then you may convey a copy of the modified
 version:
 
--  
+-
 
    a) under this License, provided that you make a good faith effort to
       ensure that, in the event an Application does not supply the
       function or data, the facility still operates, and performs
       whatever part of its purpose remains meaningful, or
 
--  
+-
 
    b) under the GNU GPL, with none of the additional permissions of this
       License applicable to that copy.
@@ -78,13 +78,13 @@ is not limited to numerical parameters, data structure layouts and
 accessors, or small macros, inline functions and templates (ten or fewer
 lines in length), you do both of the following:
 
--  
+-
 
    a) Give prominent notice with each copy of the object code that the
       Library is used in it and that the Library and its use are covered
       by this License.
 
--  
+-
 
    b) Accompany the object code with a copy of the GNU GPL and this
       license document.
@@ -97,29 +97,29 @@ together, effectively do not restrict modification of the portions of
 the Library contained in the Combined Work and reverse engineering for
 debugging such modifications, if you also do each of the following:
 
--  
+-
 
    a) Give prominent notice with each copy of the Combined Work that the
       Library is used in it and that the Library and its use are covered
       by this License.
 
--  
+-
 
    b) Accompany the Combined Work with a copy of the GNU GPL and this
       license document.
 
--  
+-
 
    c) For a Combined Work that displays copyright notices during
       execution, include the copyright notice for the Library among
       these notices, as well as a reference directing the user to the
       copies of the GNU GPL and this license document.
 
--  
+-
 
    d) Do one of the following:
 
-   -  
+   -
 
       0) Convey the Minimal Corresponding Source under the terms of this
          License, and the Corresponding Application Code in a form
@@ -129,7 +129,7 @@ debugging such modifications, if you also do each of the following:
          manner specified by section 6 of the GNU GPL for conveying
          Corresponding Source.
 
-   -  
+   -
 
       1) Use a suitable shared library mechanism for linking with the
          Library. A suitable mechanism is one that (a) uses at run time
@@ -138,7 +138,7 @@ debugging such modifications, if you also do each of the following:
          of the Library that is interface-compatible with the Linked
          Version.
 
--  
+-
 
    e) Provide Installation Information, but only if you would otherwise
       be required to provide such information under section 6 of the GNU
@@ -161,13 +161,13 @@ that are not Applications and are not covered by this License, and
 convey such a combined library under terms of your choice, if you do
 both of the following:
 
--  
+-
 
    a) Accompany the combined library with a copy of the same work based
       on the Library, uncombined with any other library facilities,
       conveyed under the terms of this License.
 
--  
+-
 
    b) Give prominent notice with the combined library that part of it is
       a work based on the Library, and explaining where to find the

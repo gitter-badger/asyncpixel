@@ -1,8 +1,10 @@
 """Guild objects."""
-
 import datetime
-from typing import Dict, List, Union, Optional
 from dataclasses import dataclass
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Union
 
 
 @dataclass
