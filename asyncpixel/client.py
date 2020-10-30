@@ -31,6 +31,7 @@ from .models.watchdog import WatchDog
 from .models.game_count import GameCounts
 from .models.game_count import GameCountsGame
 from .models.leaderboards import Leaderboards
+from .models.profile import Profile, Members, InvArmor, Objective, Quests
 
 BASE_URL = "https://api.hypixel.net/"
 
@@ -680,10 +681,10 @@ class Client:
                 location=map(int, leaderboards[key]["location"].split(",")),
                 count=leaderboards[key]["count"],
                 leaders=leaderboards[key]["leaders"],
-                )
+            )
 
         return leaderboard
-    
+
     async def get_resources_achievements(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
@@ -702,7 +703,7 @@ class Client:
         data = await self.get("resources/challenges")
         return data["challenges"]
 
-    async def get_resources_quests(self) -> Dict[str, Any]:# type: ignore
+    async def get_resources_quests(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -711,7 +712,7 @@ class Client:
         data = await self.get("resources/quests")
         return data["quests"]
 
-    async def get_resources_guilds_achievements(self) -> Dict[str, Any]:# type: ignore
+    async def get_resources_guilds_achievements(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -720,7 +721,7 @@ class Client:
         data = await self.get("resources/guilds/achievements")
         return data["guilds/achievements"]
 
-    async def get_resources_guilds_permissions(self) -> Dict[str, Any]:# type: ignore
+    async def get_resources_guilds_permissions(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -729,7 +730,7 @@ class Client:
         data = await self.get("resources/guilds/permissions")
         return data["guilds/permissions"]
 
-    async def get_resources_skyblock_collections(self) -> Dict[str, Any]:# type: ignore
+    async def get_resources_skyblock_collections(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -738,7 +739,7 @@ class Client:
         data = await self.get("resources/skyblock/collections")
         return data["skyblock/collections"]
 
-    async def get_resources_skyblock_skills(self) -> Dict[str, Any]: # type: ignore
+    async def get_resources_skyblock_skills(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
 
         Returns:
@@ -747,7 +748,59 @@ class Client:
         data = await self.get("resources/skyblock/skills")
         return data["skyblock/skills"]
 
-    async def get_profile(self, profile: str) -> Dict:
+    @staticmethod
+    async def fill_profile(data: Dict[str, Any]) -> Profile:
+        member_dict = {}
+        for member in data["members"]:
+            member_data = data["members"][member]
+            quests_dict = {}
+            for quest in member_data["quests"]:
+                quests_dict[quest] = Quests(
+                    status=member_data["quests"]["status"],
+                    activated_at=dt.datetime.fromtimestamp(member_data["quests"]["activated_at"] / 1000),
+                    activated_at_sb=dt.datetime.fromtimestamp(member_data["quests"]["activated_at_sb"] / 1000),
+                    completed_at=dt.datetime.fromtimestamp(member_data["quests"]["completed_at"] / 1000),
+                    completed_at_sb=dt.datetime.fromtimestamp(member_data["quests"]["completed_at_sb"] / 1000),
+                )
+            objective_dict = {}
+            for objective in member_data["objectives"]:
+                objective_dict[objective] = Objective(
+                    status=member_data["objectives"]["status"],
+                    progress=member_data["objectives"]["progress"],
+                    completed_at=dt.date.fromtimestamp(member_data["objectives"]["completed_at"] / 1000),
+                )
+            invarmor = InvArmor(
+                type=member_data["inv_armor"]["type"],
+                data=member_data["inv_armor"]["data"],
+            )
+            members = Members(
+                last_save=dt.date.fromtimestamp(member_data["last_save"] / 1000),
+                inv_armor=invarmor,
+                first_join=dt.date.fromtimestamp(member_data["first_join"] / 1000),
+                first_join_hub=member_data["first_join_hub"],
+                stats=member_data["stats"],
+                objectives=objective_dict,
+                tutorial=member_data["tutorial"],
+                quests=quests_dict,
+                coin_purse=member_data["coin_purse"],
+                last_death=dt.date.fromtimestamp(member_data["last_death"] / 1000),
+                crafted_generators=member_data["crafted_generators"],
+                visited_zones=member_data["visited_zones"],
+                fairy_souls_collected=member_data["fairy_souls_collected"],
+                fairy_souls=member_data["fairy_souls"],
+                death_count=member_data["death_count"],
+                slayer_bosses=member_data["slayer_bosses"],
+                pets=member_data["pets"],
+            )
+            member_dict[member] = members
+
+        return Profile(
+            profile_id=data["profile_id"],
+            cute_name=data["cute_name"],
+            members=member_dict
+        )
+
+    async def get_profile(self, profile: str) -> Profile:
         """Get profile info of a skyblock player.
 
         Args:
@@ -759,9 +812,9 @@ class Client:
         """
         params = {"profile": profile}
         data = await self.get("skyblock/profile", params=params)
-        return data["profile"]
+        return await self.fill_profile(data["profile"])
 
-    async def get_profiles(self, uuid: str) -> Dict:
+    async def get_profiles(self, uuid: str) -> Dict[str, Profile]:
         """Get info on a profile.
 
         Args:
@@ -773,4 +826,10 @@ class Client:
         uuid = uuid.replace("-", "")
         params = {"uuid": uuid}
         data = await self.get("skyblock/profiles", params=params)
-        return data["profiles"]
+        profiles = data["profiles"]
+        profile_dict = {}
+        for profile in profiles:
+            _id = list(profile.keys())[0]
+            profile_dict[_id] = await self.fill_profile(profile)
+
+        return profile_dict
