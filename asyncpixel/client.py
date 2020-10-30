@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from collections import namedtuple
 
 import aiohttp
 
@@ -27,8 +28,44 @@ from .models.news import News
 from .models.player import Player
 from .models.status import Status
 from .models.watchdog import WatchDog
+from .models.game_count import GameCounts
+from .models.game_count import GameCountsGame
+from .models.leaderboards import Leaderboards
 
 BASE_URL = "https://api.hypixel.net/"
+
+gametype = namedtuple("gametype", ["TypeName", "DatabaseName", "CleanName"])
+
+GAMETYPES = {
+    2: gametype("QUAKECRAFT", "Quake", "Quake"),
+    3: gametype("WALLS", "Walls", "Walls"),
+    4: gametype("PAINTBALL", "Paintball", "Paintball"),
+    5: gametype("SURVIVAL_GAMES", "HungerGames", "Blitz Survival Games"),
+    6: gametype("TNTGAMES", "TNTGames", "TNT Games"),
+    7: gametype("VAMPIREZ", "VampireZ", "VampireZ"),
+    13: gametype("WALLS3", "Walls3", "Mega Walls"),
+    14: gametype("ARCADE", "Arcade", "Arcade"),
+    17: gametype("ARENA", "Arena", "Arena"),
+    20: gametype("UHC", "UHC", "UHC Champions"),
+    21: gametype("MCGO", "MCGO", "Cops and Crims"),
+    23: gametype("BATTLEGROUND", "Battleground", "Warlords"),
+    24: gametype("SUPER_SMASH", "SuperSmash", "Smash Heroes"),
+    25: gametype("GINGERBREAD", "GingerBread", "Turbo Kart Racers"),
+    26: gametype("HOUSING", "Housing", "Housing"),
+    51: gametype("SKYWARS", "SkyWars", "SkyWars"),
+    52: gametype("TRUE_COMBAT", "TrueCombat", "Crazy Walls"),
+    54: gametype("SPEED_UHC", "SpeedUHC", "Speed UHC"),
+    55: gametype("SKYCLASH", "SkyClash", "SkyClash"),
+    56: gametype("LEGACY", "Legacy", "Classic Games"),
+    57: gametype("PROTOTYPE", "Prototype", "Prototype"),
+    58: gametype("BEDWARS", "Bedwars", "Bed Wars"),
+    59: gametype("MURDER_MYSTERY", "Quake", "Quake"),
+    60: gametype("QUAKECRAFT", "MurderMystery", "Murder Mystery"),
+    61: gametype("BUILD_BATTLE", "BuildBattle", "Build Battle"),
+    62: gametype("DUELS", "Duels", "Duels"),
+    63: gametype("SKYBLOCK", "SkyBlock", "SkyBlock"),
+    64: gametype("PIT", "Pit", "Pit"),
+}
 
 
 class Client:
@@ -614,113 +651,126 @@ class Client:
             )
         return auction_list
 
-    # NOT FULLY IMPLEMENTED
+    async def get_game_count(self) -> GameCounts:
+        """Gets number of players per game.
 
-    # async def get_profile(self, profile: str) -> Dict:
-    #     """Get profile info of a skyblock player.
+        Returns:
+            GameCounts: game counts
+        """
+        data = await self.get("gameCounts")
+        games = {}
+        for key in data["games"]:
+            games[key] = GameCountsGame(players=data[key]["players"], modes=data[key]["modes"])
+        return GameCounts(games=games, playercount=data["playerCount"])
 
-    #     Args:
-    #         profile (str): profile id of player ca be gotten from
-    #                         running get_profiles
+    async def get_leaderboard(self) -> Dict[str, Leaderboards]:
+        """Get the current leaderboards.
 
-    #     Returns:
-    #         Dict: json response
-    #     """
-    #     params = {"profile": profile}
-    #     data = await self.get("skyblock/profile", params=params)
-    #     return data["profile"]
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("leaderboards")
+        leaderboard = {}
+        leaderboards = data["leaderboards"]
+        for key in leaderboards:
+            leaderboard[key] = Leaderboards(
+                path=leaderboards[key]["path"],
+                prefix=leaderboards[key]["prefix"],
+                title=leaderboards[key]["title"],
+                location=map(int, leaderboards[key]["location"].split(",")),
+                count=leaderboards[key]["count"],
+                leaders=leaderboards[key]["leaders"],
+                )
 
-    # async def get_profiles(self, uuid: str) -> Dict:
-    #     """Get info on a profile.
+        return leaderboard
+    
+    async def get_resources_achievements(self) -> Dict[str, Any]:
+        """Get the current resources. Does not require api key.
 
-    #     Args:
-    #         uuid (str): uuid of player
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/achievements")
+        return data["achievements"]
 
-    #     Returns:
-    #         Dict: json response
-    #     """
-    #     uuid = uuid.replace("-", "")
-    #     params = {"uuid": uuid}
-    #     data = await self.get("skyblock/profiles", params=params)
-    #     return data["profiles"]
+    async def get_resources_challenges(self) -> Dict[str, Any]:
+        """Get the current resources. Does not require api key.
 
-    # async def get_game_count(self) -> Dict:# type: ignore
-    #     """Get the current game count.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/challenges")
+        return data["challenges"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("gameCounts")
-    #     return data["games"]
+    async def get_resources_quests(self) -> Dict[str, Any]:# type: ignore
+        """Get the current resources. Does not require api key.
 
-    # async def get_leaderboard(self) -> Dict:# type: ignore
-    #     """Get the current leaderboards.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/quests")
+        return data["quests"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("leaderboards")
-    #     return data["leaderboards"]
+    async def get_resources_guilds_achievements(self) -> Dict[str, Any]:# type: ignore
+        """Get the current resources. Does not require api key.
 
-    # async def get_resources_achievements(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/guilds/achievements")
+        return data["guilds/achievements"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/achievements")
-    #     return data["achievements"]
+    async def get_resources_guilds_permissions(self) -> Dict[str, Any]:# type: ignore
+        """Get the current resources. Does not require api key.
 
-    # async def get_resources_challenges(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/guilds/permissions")
+        return data["guilds/permissions"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/challenges")
-    #     return data["challenges"]
+    async def get_resources_skyblock_collections(self) -> Dict[str, Any]:# type: ignore
+        """Get the current resources. Does not require api key.
 
-    # async def get_resources_quests(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/skyblock/collections")
+        return data["skyblock/collections"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/quests")
-    #     return data["quests"]
+    async def get_resources_skyblock_skills(self) -> Dict[str, Any]: # type: ignore
+        """Get the current resources. Does not require api key.
 
-    # async def get_resources_guilds_achievements(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+        Returns:
+            dict: raw json response
+        """
+        data = await self.get("resources/skyblock/skills")
+        return data["skyblock/skills"]
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/guilds/achievements")
-    #     return data["guilds/achievements"]
+    async def get_profile(self, profile: str) -> Dict:
+        """Get profile info of a skyblock player.
 
-    # async def get_resources_guilds_permissions(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+        Args:
+            profile (str): profile id of player ca be gotten from
+                            running get_profiles
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/guilds/permissions")
-    #     return data["guilds/permissions"]
+        Returns:
+            Dict: json response
+        """
+        params = {"profile": profile}
+        data = await self.get("skyblock/profile", params=params)
+        return data["profile"]
 
-    # async def get_resources_skyblock_collections(self) -> Dict:# type: ignore
-    #     """Get the current resources. Does not require api key.
+    async def get_profiles(self, uuid: str) -> Dict:
+        """Get info on a profile.
 
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/skyblock/collections")
-    #     return data["skyblock/collections"]
+        Args:
+            uuid (str): uuid of player
 
-    # async def get_resources_skyblock_skills(self) -> Dict: # type: ignore
-    #     """Get the current resources. Does not require api key.
-
-    #     Returns:
-    #         dict: raw json response
-    #     """
-    #     data = await self.get("resources/skyblock/skills")
-    #     return data["skyblock/skills"]
+        Returns:
+            Dict: json response
+        """
+        uuid = uuid.replace("-", "")
+        params = {"uuid": uuid}
+        data = await self.get("skyblock/profiles", params=params)
+        return data["profiles"]
