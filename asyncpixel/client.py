@@ -5,6 +5,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 import aiohttp
 
@@ -668,7 +669,7 @@ class Client:
             games[key] = GameCountsGame(
                 players=data[key]["players"], modes=data[key]["modes"]
             )
-        return GameCounts(games=games, playercount=data["playerCount"])
+        return GameCounts(games=games, player_count=data["playerCount"])
 
     async def get_leaderboard(self) -> Dict[str, Leaderboards]:
         """Get the current leaderboards.
@@ -680,11 +681,16 @@ class Client:
         leaderboard = {}
         leaderboards = data["leaderboards"]
         for key in leaderboards:
+            location: Tuple[int, int, int] = (
+                int(leaderboards[key]["location"].split(",")[0]),
+                int(leaderboards[key]["location"].split(",")[1]),
+                int(leaderboards[key]["location"].split(",")[2])
+            )
             leaderboard[key] = Leaderboards(
                 path=leaderboards[key]["path"],
                 prefix=leaderboards[key]["prefix"],
                 title=leaderboards[key]["title"],
-                location=map(int, leaderboards[key]["location"].split(",")),
+                location=location,
                 count=leaderboards[key]["count"],
                 leaders=leaderboards[key]["leaders"],
             )
@@ -698,7 +704,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/achievements")
-        return data["achievements"]
+        result: Dict[str, Any] = data["achievements"]
+        return result
 
     async def get_resources_challenges(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -707,7 +714,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/challenges")
-        return data["challenges"]
+        result: Dict[str, Any] = data["challenges"]
+        return result
 
     async def get_resources_quests(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -716,7 +724,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/quests")
-        return data["quests"]
+        result: Dict[str, Any] = data["skyblock/quests"]
+        return result
 
     async def get_resources_guilds_achievements(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -725,7 +734,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/guilds/achievements")
-        return data["guilds/achievements"]
+        result: Dict[str, Any] = data["skyblock/achievements"]
+        return result
 
     async def get_resources_guilds_permissions(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -734,7 +744,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/guilds/permissions")
-        return data["guilds/permissions"]
+        result: Dict[str, Any] = data["skyblock/permissions"]
+        return result
 
     async def get_resources_skyblock_collections(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -743,7 +754,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/skyblock/collections")
-        return data["skyblock/collections"]
+        result: Dict[str, Any] = data["skyblock/collections"]
+        return result
 
     async def get_resources_skyblock_skills(self) -> Dict[str, Any]:
         """Get the current resources. Does not require api key.
@@ -752,7 +764,8 @@ class Client:
             dict: raw json response
         """
         data = await self._get("resources/skyblock/skills")
-        return data["skyblock/skills"]
+        result: Dict[str, Any] = data["skyblock/skills"]
+        return result
 
     @staticmethod
     async def _fill_profile(data: Dict[str, Any]) -> Profile:
@@ -789,7 +802,7 @@ class Client:
                 objective_dict[objective] = Objective(
                     status=member_data["objectives"]["status"],
                     progress=member_data["objectives"]["progress"],
-                    completed_at=dt.date.fromtimestamp(
+                    completed_at=dt.datetime.fromtimestamp(
                         member_data["objectives"]["completed_at"] / 1000
                     ),
                 )
@@ -798,16 +811,16 @@ class Client:
                 data=member_data["inv_armor"]["data"],
             )
             members = Members(
-                last_save=dt.date.fromtimestamp(member_data["last_save"] / 1000),
+                last_save=dt.datetime.fromtimestamp(member_data["last_save"] / 1000),
                 inv_armor=invarmor,
-                first_join=dt.date.fromtimestamp(member_data["first_join"] / 1000),
+                first_join=dt.datetime.fromtimestamp(member_data["first_join"] / 1000),
                 first_join_hub=member_data["first_join_hub"],
                 stats=member_data["stats"],
                 objectives=objective_dict,
                 tutorial=member_data["tutorial"],
                 quests=quests_dict,
                 coin_purse=member_data["coin_purse"],
-                last_death=dt.date.fromtimestamp(member_data["last_death"] / 1000),
+                last_death=dt.datetime.fromtimestamp(member_data["last_death"] / 1000),
                 crafted_generators=member_data["crafted_generators"],
                 visited_zones=member_data["visited_zones"],
                 fairy_souls_collected=member_data["fairy_souls_collected"],
@@ -836,8 +849,8 @@ class Client:
         """
         params = {"profile": profile}
         data = await self._get("skyblock/profile", params=params)
-        profile = await self._fill_profile(data["profile"])
-        return profile
+        profiles: Profile = await self._fill_profile(data["profile"])
+        return profiles
 
     async def get_profiles(self, uuid: str) -> Dict[str, Profile]:
         """Get info on a profile.
