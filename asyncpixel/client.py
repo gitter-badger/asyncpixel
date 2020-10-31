@@ -1,10 +1,10 @@
 """A Python HypixelAPI wrapper."""
 import datetime as dt
+from collections import namedtuple
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
-from collections import namedtuple
 
 import aiohttp
 
@@ -21,17 +21,21 @@ from .models.bazaar import BazaarSellSummary
 from .models.booster import Booster
 from .models.booster import Boosters
 from .models.friends import Friend
+from .models.game_count import GameCounts
+from .models.game_count import GameCountsGame
 from .models.games import Game
 from .models.guild import Guild
 from .models.key import Key
+from .models.leaderboards import Leaderboards
 from .models.news import News
 from .models.player import Player
+from .models.profile import InvArmor
+from .models.profile import Members
+from .models.profile import Objective
+from .models.profile import Profile
+from .models.profile import Quests
 from .models.status import Status
 from .models.watchdog import WatchDog
-from .models.game_count import GameCounts
-from .models.game_count import GameCountsGame
-from .models.leaderboards import Leaderboards
-from .models.profile import Profile, Members, InvArmor, Objective, Quests
 
 BASE_URL = "https://api.hypixel.net/"
 
@@ -81,9 +85,9 @@ class Client:
 
         Args:
             api_key (Optional[str], optional): hypixel api key. Defaults to None.
-            session (Optional[aiohttp.ClientSession], optional): provide an aiohttp session. Defaults to None.
+            session (Optional[aiohttp.ClientSession], optional): provide
+                an aiohttp session. Defaults to None.
         """
-
         self.api_key = api_key
 
         if session:
@@ -95,7 +99,7 @@ class Client:
         """Used for safe client cleanup and stuff."""
         await self.session.close()
 
-    async def get(
+    async def _get(
         self, path: str, params: Optional[Dict[str, Any]] = None
     ) -> Dict[str, Any]:
         """Base function to get raw data from hypixel.
@@ -140,7 +144,7 @@ class Client:
         Returns:
             WatchDog: WatchDog stats object
         """
-        data = await self.get("watchdogstats")
+        data = await self._get("watchdogstats")
 
         return WatchDog(
             watchdog_last_minute=data["watchdog_lastMinute"],
@@ -162,7 +166,7 @@ class Client:
         if not key:
             key = self.api_key
 
-        data = await self.get("key")
+        data = await self._get("key")
 
         return Key(
             key=data["record"]["key"],
@@ -178,7 +182,7 @@ class Client:
         Returns:
             Boosters: object containing boosters
         """
-        data = await self.get("boosters")
+        data = await self._get("boosters")
         boosterlist = []
 
         for boost in data["boosters"]:
@@ -207,7 +211,7 @@ class Client:
         Returns:
             int: number of online players
         """
-        data = await self.get("playerCount")
+        data = await self._get("playerCount")
 
         return int(data["playerCount"])
 
@@ -217,7 +221,7 @@ class Client:
         Returns:
             List[News]: List of news objects
         """
-        data = await self.get("skyblock/news")
+        data = await self._get("skyblock/news")
         news_list = []
         for item in data["items"]:
             news_list.append(
@@ -241,7 +245,7 @@ class Client:
             Status: Status object of player
         """
         uuid = uuid.replace("-", "")
-        data = await self.get("status", params={"uuid": uuid})
+        data = await self._get("status", params={"uuid": uuid})
         if data["session"]["online"]:
             return Status(
                 online=True,
@@ -262,7 +266,7 @@ class Client:
         """
         uuid = uuid.replace("-", "")
         params = {"uuid": uuid}
-        data = await self.get("friends", params=params)
+        data = await self._get("friends", params=params)
 
         friend_list = []
         for friend in data["records"]:
@@ -283,7 +287,7 @@ class Client:
         Returns:
             Bazaar: object for bazzar
         """
-        data = await self.get("skyblock/bazaar")
+        data = await self._get("skyblock/bazaar")
 
         bazaar_items = []
 
@@ -344,7 +348,7 @@ class Client:
             Auction: Auction object.
         """
         params = {"page": page}
-        data = await self.get("skyblock/auctions", params=params)
+        data = await self._get("skyblock/auctions", params=params)
         auction_list = []
         for auc in data["auctions"]:
             auction_list.append(
@@ -388,7 +392,7 @@ class Client:
         """
         uuid = uuid.replace("-", "")
         params = {"uuid": uuid}
-        data = await self.get("recentGames", params=params)
+        data = await self._get("recentGames", params=params)
 
         games_list = []
         for game in data["games"]:
@@ -425,7 +429,7 @@ class Client:
         """
         uuid = uuid.replace("-", "")
         params = {"uuid": uuid}
-        data = await self.get("player", params=params)
+        data = await self._get("player", params=params)
 
         return Player(
             _id=data["player"]["_id"],
@@ -456,11 +460,11 @@ class Client:
             current_gadget=data["player"]["currentGadget"],
             channel=data["player"]["channel"],
             most_recent_game_type=data["player"]["mostRecentGameType"],
-            level=self.calc_player_level(data["player"]["networkExp"]),
+            level=self._calc_player_level(data["player"]["networkExp"]),
         )
 
     @staticmethod
-    def calc_player_level(xp: int) -> int:
+    def _calc_player_level(xp: int) -> int:
         """Calculate player level from xp.
 
         Args:
@@ -481,7 +485,7 @@ class Client:
             str: id of guild
         """
         params = {"byName": name}
-        data = await self.get("findGuild", params=params)
+        data = await self._get("findGuild", params=params)
         return str(data["guild"])
 
     async def find_guild_by_uuid(self, uuid: str) -> str:
@@ -495,7 +499,7 @@ class Client:
         """
         uuid = uuid.replace("-", "")
         params = {"byUuid": uuid}
-        data = await self.get("findGuild", params=params)
+        data = await self._get("findGuild", params=params)
         return str(data["guild"])
 
     async def get_guild_by_name(self, guild_name: str) -> Guild:
@@ -508,8 +512,8 @@ class Client:
             Guild: guild object
         """
         params = {"name": guild_name}
-        data = await self.get("guild", params=params)
-        guild_object = self.create_guild_object(data)
+        data = await self._get("guild", params=params)
+        guild_object = self._create_guild_object(data)
         return guild_object
 
     async def get_guild_by_id(self, guild_id: int) -> Guild:
@@ -522,8 +526,8 @@ class Client:
             Guild: guild object
         """
         params = {"id": guild_id}
-        data = await self.get("guild", params=params)
-        guild_object = self.create_guild_object(data)
+        data = await self._get("guild", params=params)
+        guild_object = self._create_guild_object(data)
         return guild_object
 
     async def get_guild_by_player(self, player_uuid: str) -> Guild:
@@ -537,12 +541,12 @@ class Client:
         """
         player_uuid = player_uuid.replace("-", "")
         params = {"player": player_uuid}
-        data = await self.get("guild", params=params)
-        guild_object = self.create_guild_object(data)
+        data = await self._get("guild", params=params)
+        guild_object = self._create_guild_object(data)
         return guild_object
 
     @staticmethod
-    def create_guild_object(data: Dict[str, Any]) -> Guild:
+    def _create_guild_object(data: Dict[str, Any]) -> Guild:
         """Create guild object from json.
 
         Args:
@@ -584,8 +588,8 @@ class Client:
             List[Auction_item]: list of auctions
         """
         params = {"uuid": uuid}
-        data = await self.get("skyblock/auction", params=params)
-        auction_items = self.create_auction_object(data)
+        data = await self._get("skyblock/auction", params=params)
+        auction_items = self._create_auction_object(data)
         return auction_items
 
     async def get_auction_from_player(self, player: str) -> List[AuctionItem]:
@@ -598,8 +602,8 @@ class Client:
             List[Auction_item]: list of auction items
         """
         params = {"player": player}
-        data = await self.get("skyblock/auction", params=params)
-        auction_items = self.create_auction_object(data)
+        data = await self._get("skyblock/auction", params=params)
+        auction_items = self._create_auction_object(data)
         return auction_items
 
     async def get_auction_from_profile(self, profile_id: str) -> List[AuctionItem]:
@@ -612,12 +616,12 @@ class Client:
             List[Auction_item]: list of auction items
         """
         params = {"profile": profile_id}
-        data = await self.get("skyblock/auction", params=params)
-        auction_items = self.create_auction_object(data)
+        data = await self._get("skyblock/auction", params=params)
+        auction_items = self._create_auction_object(data)
         return auction_items
 
     @staticmethod
-    def create_auction_object(data: Dict[str, Any]) -> List[AuctionItem]:
+    def _create_auction_object(data: Dict[str, Any]) -> List[AuctionItem]:
         """Create auction object.
 
         Args:
@@ -658,10 +662,13 @@ class Client:
         Returns:
             GameCounts: game counts
         """
-        data = await self.get("gameCounts")
+        data = await self._get("gameCounts")
         games = {}
         for key in data["games"]:
-            games[key] = GameCountsGame(players=data[key]["players"], modes=data[key]["modes"])
+            games[key] = GameCountsGame(
+                players=data[key]["players"],
+                modes=data[key]["modes"]
+            )
         return GameCounts(games=games, playercount=data["playerCount"])
 
     async def get_leaderboard(self) -> Dict[str, Leaderboards]:
@@ -670,7 +677,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("leaderboards")
+        data = await self._get("leaderboards")
         leaderboard = {}
         leaderboards = data["leaderboards"]
         for key in leaderboards:
@@ -691,7 +698,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/achievements")
+        data = await self._get("resources/achievements")
         return data["achievements"]
 
     async def get_resources_challenges(self) -> Dict[str, Any]:
@@ -700,7 +707,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/challenges")
+        data = await self._get("resources/challenges")
         return data["challenges"]
 
     async def get_resources_quests(self) -> Dict[str, Any]:
@@ -709,7 +716,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/quests")
+        data = await self._get("resources/quests")
         return data["quests"]
 
     async def get_resources_guilds_achievements(self) -> Dict[str, Any]:
@@ -718,7 +725,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/guilds/achievements")
+        data = await self._get("resources/guilds/achievements")
         return data["guilds/achievements"]
 
     async def get_resources_guilds_permissions(self) -> Dict[str, Any]:
@@ -727,7 +734,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/guilds/permissions")
+        data = await self._get("resources/guilds/permissions")
         return data["guilds/permissions"]
 
     async def get_resources_skyblock_collections(self) -> Dict[str, Any]:
@@ -736,7 +743,7 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/skyblock/collections")
+        data = await self._get("resources/skyblock/collections")
         return data["skyblock/collections"]
 
     async def get_resources_skyblock_skills(self) -> Dict[str, Any]:
@@ -745,11 +752,19 @@ class Client:
         Returns:
             dict: raw json response
         """
-        data = await self.get("resources/skyblock/skills")
+        data = await self._get("resources/skyblock/skills")
         return data["skyblock/skills"]
 
     @staticmethod
-    async def fill_profile(data: Dict[str, Any]) -> Profile:
+    async def _fill_profile(data: Dict[str, Any]) -> Profile:
+        """Generate profile.
+
+        Args:
+            data (Dict[str, Any]): profile dict
+
+        Returns:
+            Profile: profile class
+        """
         member_dict = {}
         for member in data["members"]:
             member_data = data["members"][member]
@@ -757,17 +772,26 @@ class Client:
             for quest in member_data["quests"]:
                 quests_dict[quest] = Quests(
                     status=member_data["quests"]["status"],
-                    activated_at=dt.datetime.fromtimestamp(member_data["quests"]["activated_at"] / 1000),
-                    activated_at_sb=dt.datetime.fromtimestamp(member_data["quests"]["activated_at_sb"] / 1000),
-                    completed_at=dt.datetime.fromtimestamp(member_data["quests"]["completed_at"] / 1000),
-                    completed_at_sb=dt.datetime.fromtimestamp(member_data["quests"]["completed_at_sb"] / 1000),
+                    activated_at=dt.datetime.fromtimestamp(
+                        member_data["quests"]["activated_at"] / 1000
+                    ),
+                    activated_at_sb=dt.datetime.fromtimestamp(
+                        member_data["quests"]["activated_at_sb"] / 1000),
+                    completed_at=dt.datetime.fromtimestamp(
+                        member_data["quests"]["completed_at"] / 1000
+                    ),
+                    completed_at_sb=dt.datetime.fromtimestamp(
+                        member_data["quests"]["completed_at_sb"] / 1000
+                    ),
                 )
             objective_dict = {}
             for objective in member_data["objectives"]:
                 objective_dict[objective] = Objective(
                     status=member_data["objectives"]["status"],
                     progress=member_data["objectives"]["progress"],
-                    completed_at=dt.date.fromtimestamp(member_data["objectives"]["completed_at"] / 1000),
+                    completed_at=dt.date.fromtimestamp(
+                        member_data["objectives"]["completed_at"] / 1000
+                    ),
                 )
             invarmor = InvArmor(
                 type=member_data["inv_armor"]["type"],
@@ -804,15 +828,16 @@ class Client:
         """Get profile info of a skyblock player.
 
         Args:
-            profile (str): profile id of player ca be gotten from
+            profile (str): profile id of player can be gotten from
                             running get_profiles
 
         Returns:
-            Dict: json response
+            Profile: Profile
         """
         params = {"profile": profile}
-        data = await self.get("skyblock/profile", params=params)
-        return await self.fill_profile(data["profile"])
+        data = await self._get("skyblock/profile", params=params)
+        profile = await self._fill_profile(data["profile"])
+        return profile
 
     async def get_profiles(self, uuid: str) -> Dict[str, Profile]:
         """Get info on a profile.
@@ -825,11 +850,11 @@ class Client:
         """
         uuid = uuid.replace("-", "")
         params = {"uuid": uuid}
-        data = await self.get("skyblock/profiles", params=params)
+        data = await self._get("skyblock/profiles", params=params)
         profiles = data["profiles"]
         profile_dict = {}
         for profile in profiles:
             _id = list(profile.keys())[0]
-            profile_dict[_id] = await self.fill_profile(profile)
+            profile_dict[_id] = await self._fill_profile(profile)
 
         return profile_dict

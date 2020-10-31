@@ -1,7 +1,9 @@
 """Profile objects."""
 import datetime
 from dataclasses import dataclass
-from typing import Any, List, Dict
+from typing import Any
+from typing import Dict
+from typing import List
 
 
 @dataclass

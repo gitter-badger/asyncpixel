@@ -15,4 +15,3 @@ class GameCounts:
 
     games: Dict[str, GameCountsGame]
     player_count: int
-
