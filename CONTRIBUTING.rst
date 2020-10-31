@@ -111,6 +111,13 @@ Feel free to submit early, though—we can always iterate on this.
 
 To run linting and code formatting checks before commiting your change, you can install pre-commit as a Git hook by running the following command:
 
+Currently not working for somereason so just run 
+
+.. code:: console
+
+   $ nox --session=pre-commit
+
+TO FIX
 .. code:: console
 
    $ nox --session=pre-commit -- install
