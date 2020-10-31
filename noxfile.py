@@ -23,11 +23,13 @@ nox.options.sessions = (
 
 def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
     """Activate virtualenv in hooks installed by pre-commit.
+
+    Args:
+        session: The Session object.
+
     This function patches git hooks installed by pre-commit to activate the
     session's virtual environment. This allows pre-commit to locate hooks in
     that environment when invoked from git.
-    Args:
-        session: The Session object.
     """
     if session.bin is None:
         return
@@ -70,7 +72,7 @@ def activate_virtualenv_in_precommit_hooks(session: Session) -> None:
         hook.write_text("\n".join(lines))
 
 
-@nox.session(name="pre-commit", python="3.9")
+@nox.session(name="pre-commit", python="3.8")
 def precommit(session: Session) -> None:
     """Lint using pre-commit."""
     args = session.posargs or ["run", "--all-files", "--show-diff-on-failure"]
@@ -157,7 +159,6 @@ def docs_build(session: Session) -> None:
         "sphinxcontrib.asyncio",
     )
 
-
     build_dir = Path("docs", "_build")
     if build_dir.exists():
         shutil.rmtree(build_dir)
@@ -170,7 +171,13 @@ def docs(session: Session) -> None:
     """Build and serve the documentation with live reloading on file changes."""
     args = session.posargs or ["--open-browser", "docs", "docs/_build"]
     session.install(".")
-    session.install("sphinx", "sphinx-autobuild", "sphinx-rtd-theme", "sphinx-autodoc-typehints", "sphinxcontrib.asyncio")
+    session.install(
+        "sphinx",
+        "sphinx-autobuild",
+        "sphinx-rtd-theme",
+        "sphinx-autodoc-typehints",
+        "sphinxcontrib.asyncio",
+    )
 
     build_dir = Path("docs", "_build")
     if build_dir.exists():

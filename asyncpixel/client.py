@@ -666,8 +666,7 @@ class Client:
         games = {}
         for key in data["games"]:
             games[key] = GameCountsGame(
-                players=data[key]["players"],
-                modes=data[key]["modes"]
+                players=data[key]["players"], modes=data[key]["modes"]
             )
         return GameCounts(games=games, playercount=data["playerCount"])
 
@@ -776,7 +775,8 @@ class Client:
                         member_data["quests"]["activated_at"] / 1000
                     ),
                     activated_at_sb=dt.datetime.fromtimestamp(
-                        member_data["quests"]["activated_at_sb"] / 1000),
+                        member_data["quests"]["activated_at_sb"] / 1000
+                    ),
                     completed_at=dt.datetime.fromtimestamp(
                         member_data["quests"]["completed_at"] / 1000
                     ),
@@ -821,7 +821,7 @@ class Client:
         return Profile(
             profile_id=data["profile_id"],
             cute_name=data["cute_name"],
-            members=member_dict
+            members=member_dict,
         )
 
     async def get_profile(self, profile: str) -> Profile:

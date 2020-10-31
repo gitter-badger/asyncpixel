@@ -1,10 +1,11 @@
 """All exceptions for asyncpixel."""
+from typing import Optional
 
 
 class RateLimitError(Exception):
     """Raised when a ratelimit is reached."""
 
-    def __init__(self, source: str = "unknown source") -> None:
+    def __init__(self, source: Optional[str] = "unknown source") -> None:
         """Error raised when ratelimit reached.
 
         Args:

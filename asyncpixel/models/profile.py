@@ -9,28 +9,35 @@ from typing import List
 @dataclass
 class Quests:
     """Armor."""
+
     status: str
     activated_at: datetime.datetime
     activated_at_sb: datetime.datetime
     completed_at: datetime.datetime
     completed_at_sb: datetime.datetime
 
+
 @dataclass
 class Objective:
     """Armor."""
+
     status: str
     progress: int
     completed_at: datetime.datetime
 
+
 @dataclass
 class InvArmor:
     """Armor."""
+
     type: int
     data: str
+
 
 @dataclass
 class Members:
     """Member."""
+
     last_save: datetime.datetime
     inv_armor: InvArmor
     first_join: datetime.datetime
@@ -53,6 +60,7 @@ class Members:
 @dataclass
 class Profile:
     """Profile."""
+
     profile_id: str
     cute_name: str
     members: Dict[str, Members]
